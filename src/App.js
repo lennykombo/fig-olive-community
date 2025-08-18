@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import RedirectPage from "./RedirectPage";
 import logo from "./assets/figlogo.png"
@@ -5,18 +7,87 @@ import logo from "./assets/figlogo.png"
 function App() {
 
   function Home() {
+     const logoRef = useRef(null);
+     const textRef = useRef(null);
+     const smokeRef = useRef(null);
+
+      useEffect(() => {
+    // Logo animation
+    gsap.fromTo(
+      logoRef.current,
+      { y: -100, scale: 0.2, rotation: 0, opacity: 0 },
+      { y: 0, scale: 1, rotation: 720, opacity: 1, duration: 2.5, ease: "bounce.out" }
+    );
+
+    // Welcome text stagger animation (delay slightly to start after logo)
+   gsap.fromTo(
+  textRef.current.querySelectorAll(".letter"),
+  { y: -50, rotation: -360, opacity: 0 }, // start above and rotated
+  { 
+    y: 0, 
+    rotation: 0, 
+    opacity: 1, 
+    stagger: 0.1,   // delay between letters
+    duration: 0.6, 
+    ease: "bounce.out", // bounce as they land
+    delay: 1.5
+  }
+);
+
+  }, []);
+
+   useEffect(() => {
+  // Smoke puff animation
+  gsap.fromTo(
+    smokeRef.current,
+    { scale: 0, opacity: 0, y: 0 },
+    { scale: 1.2, opacity: 0.6, y: -50, duration: 1, ease: "power1.out", delay: 0.5 }
+  );
+
+  // Buttons slide in with bounce at the end
+  gsap.fromTo(".btn1", 
+    { x: -100, opacity: 0 }, 
+    { x: 0, opacity: 1, duration: 0.8, ease: "bounce.out", delay: 1.2 }
+  );
+  gsap.fromTo(".btn2", 
+    { x: 100, opacity: 0 }, 
+    { x: 0, opacity: 1, duration: 0.8, ease: "bounce.out", delay: 1.4 }
+  );
+  gsap.fromTo(".btn3", 
+    { x: -100, opacity: 0 }, 
+    { x: 0, opacity: 1, duration: 0.8, ease: "bounce.out", delay: 1.6 }
+  );
+}, []);
+
     return (
       <div style={containerStyle}>
        
-        <img
-          src={logo}
-          alt="Fig & Olive Logo"
-          style={{ width: "250px", marginBottom: "24px" }}
-        />
-        <h1 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px", color:'#324b2b' }}>
-         Welcome!
-        </h1>
-        <div style={buttonContainerStyle}>
+            <img
+  ref={logoRef}
+  src={logo}
+  alt="Fig & Olive Logo"
+  style={{
+    width: "250px",
+    marginBottom: "16px",
+    zIndex: 1,
+    position: "relative",
+  }}
+/>
+
+
+<h1 ref={textRef}>
+  {"Welcome!".split("").map((char, index) => (
+    <span
+      key={index}
+      className="letter"
+      style={{ display: "inline-block" }}
+    >
+      {char}
+    </span>
+  ))}
+</h1>
+
+        {/*<div style={buttonContainerStyle}>
           <a
             href="https://forms.gle/GCQ5XS6yTs2W9TyY8"
             target="_blank"
@@ -41,7 +112,33 @@ function App() {
           >
             <span style={textstyle}>Join the Community</span>
           </a>
-        </div>
+        </div>*/}
+        <div style={buttonContainerStyle}>
+        <a  href="https://forms.gle/GCQ5XS6yTs2W9TyY8"
+            target="_blank"
+            rel="noopener noreferrer" 
+            className="btn1" 
+            style={{ ...buttonStyle, backgroundColor: "black" }}>
+              <span style={textstyle}>Leave a Restaurant Review</span>
+       </a>
+        <a href="https://forms.gle/rdgfnce2zbAjNX8W7"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn2" 
+            style={{ ...buttonStyle, backgroundColor: "#fff", color: "black" }}>
+              <span style={{...textstyle, color:'black'}}>Leave a Conference Review</span>
+       </a>
+        <a href="https://forms.gle/9Ujacvh86PbKWnCX7"
+            target="_blank"
+            rel="noopener noreferrer" 
+            className="btn3" 
+            style={{ ...buttonStyle, backgroundColor: "#8f957e" }}>
+              <span style={textstyle}>Join the Community</span>
+       </a>
+      </div>
+
+      {/* Smoke behind buttons */}
+      <div ref={smokeRef} style={smokeStyle}></div>
       </div>
    
     );
@@ -60,7 +157,7 @@ function App() {
 export default App;
 
 const containerStyle = {
-  display: "flex",
+    display: "flex",
   alignItems: "center",
   justifyContent: "center",
   height: "100vh",
@@ -78,6 +175,7 @@ const buttonContainerStyle = {
   width: "90%",
   gap: "12px",
   marginTop: "16px",
+  zIndex: 3,
 };
 
 const textstyle ={
@@ -87,17 +185,30 @@ const textstyle ={
 
 const buttonStyle = {
   display: "block",
-  width: "80%", // Set button width to 80% to make it look balanced
-  maxWidth: "300px", // Prevents stretching on large screens
+  width: "80%",
+  maxWidth: "300px",
   padding: "12px",
   fontSize: "16px",
   color: "#fff",
   borderRadius: "8px",
   border: "none",
   cursor: "pointer",
-  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
   textDecoration: "none",
   textAlign: "center",
+  opacity: 0, // start hidden
+};
+const smokeStyle = {
+   position: "absolute",
+  bottom: 380,
+  left: "50%",
+  width: "420px",
+  height: "420px",
+  background: "radial-gradient(circle, rgba(200,200,200,0.6) 0%, rgba(180,180,180,0.4) 40%, transparent 70%)",
+  borderRadius: "50%",
+  transform: "translateX(-50%) scale(0)",
+  opacity: 0,
+  zIndex: 1, 
 };
 
 
